@@ -7,6 +7,7 @@ def main():
     print(chess_board.white_pawn_possible_moves(52))
     print(chess_board.white_pawn_possible_moves(44))
     print(chess_board.white_pawn_possible_moves(28))
+    print(chess_board.black_pawn_possible_moves(11))
 
 
 # Press the green button in the gutter to run the script.

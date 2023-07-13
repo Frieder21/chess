@@ -96,6 +96,30 @@ class chess_board:
                         possible_moves.append(position - 7)
             return possible_moves
 
+    def black_pawn_possible_moves(self, position):
+        if position > (self.height-1)*self.width-1:
+            return []
+        else:
+            possible_moves = []
+            if self.board[position + 8] == 0:
+                possible_moves.append(position + 8)
+            if position % self.width != 0:
+                if self.board[position + 7] & self.white:
+                    possible_moves.append(position + 7)
+            if position % self.width != 7:
+                if self.board[position + 9] & self.white:
+                    possible_moves.append(position + 9)
+            if position // self.width == 1:
+                if self.board[position + 16] == 0:
+                    possible_moves.append(position + 16)
+            if self.en_passant != False:
+                if position % self.width != 0:
+                    if self.en_passant == position + 7:
+                        possible_moves.append(position + 7)
+                if position % self.width != 7:
+                    if self.en_passant == position + 9:
+                        possible_moves.append(position + 9)
+            return possible_moves
     def possible_moves(self, position):
         if self.board[position] & self.pawn:
             if self.board[position] & self.white:
