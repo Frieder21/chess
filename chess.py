@@ -1,6 +1,7 @@
 class chess_board:
     def clear_board(self):
         self.board = [0b0 for i in range(self.height * self.width)]
+
     def FEN_to_binary(self, FEN):
         self.clear_board()
         chess_field = 0
@@ -65,66 +66,120 @@ class chess_board:
             self.moving_side = False
         self.castling = FEN[2]
         if FEN[3] != '-':
-            self.en_passant = (self.letter2int(FEN[3][0:1])) + (8-int(FEN[3][1:2]))*self.height
+            self.en_passant = (self.letter2int(FEN[3][0:1])) + (8 - int(FEN[3][1:2])) * self.height
         else:
             self.en_passant = False
         self.halfmove_clock = int(FEN[4])
         self.fullmove_number = int(FEN[5])
 
     def white_pawn_possible_moves(self, position):
-        if position < 8:
+        if position < self.height:
             return []
         else:
             possible_moves = []
-            if self.board[position - 8] == 0:
-                possible_moves.append(position - 8)
+            if self.board[position - (self.width)] == 0:
+                possible_moves.append(position - (self.width))
             if position % self.width != 0:
-                if self.board[position - 9] & self.black:
-                    possible_moves.append(position - 9)
-            if position % self.width != 7:
-                if self.board[position - 7] & self.black:
-                    possible_moves.append(position - 7)
-            if position // self.width == 6:
-                if self.board[position - 16] == 0:
-                    possible_moves.append(position - 16)
+                if self.board[position - (self.width + 1)] & self.black:
+                    possible_moves.append(position - (self.width + 1))
+            if position % self.width != (self.width - 1):
+                if self.board[position - (self.width - 1)] & self.black:
+                    possible_moves.append(position - (self.width - 1))
+            if position // self.width == (self.height - 2):
+                if self.board[position - (self.width * 2)] == 0:
+                    possible_moves.append(position - (self.width * 2))
             if self.en_passant != False:
                 if position % self.width != 0:
-                    if self.en_passant == position - 9:
-                        possible_moves.append(position - 9)
-                if position % self.width != 7:
-                    if self.en_passant == position - 7:
-                        possible_moves.append(position - 7)
+                    if self.en_passant == position - (self.width + 1):
+                        possible_moves.append(position - (self.width + 1))
+                if position % self.width != (self.width - 1):
+                    if self.en_passant == position - (self.width - 1):
+                        possible_moves.append(position - (self.width - 1))
             return possible_moves
 
     def black_pawn_possible_moves(self, position):
-        if position > (self.height-1)*self.width-1:
+        if position > (self.height - 1) * self.width - 1:
             return []
         else:
             possible_moves = []
-            if self.board[position + 8] == 0:
-                possible_moves.append(position + 8)
+            if self.board[position + self.width] == 0:
+                possible_moves.append(position + self.width)
             if position % self.width != 0:
-                if self.board[position + 7] & self.white:
-                    possible_moves.append(position + 7)
-            if position % self.width != 7:
-                if self.board[position + 9] & self.white:
-                    possible_moves.append(position + 9)
+                if self.board[position + (self.width - 1)] & self.white:
+                    possible_moves.append(position + (self.width - 1))
+            if position % self.width != (self.width - 1):
+                if self.board[position + (self.width + 1)] & self.white:
+                    possible_moves.append(position + (self.width + 1))
             if position // self.width == 1:
-                if self.board[position + 16] == 0:
-                    possible_moves.append(position + 16)
+                if self.board[position + (self.width * 2)] == 0:
+                    possible_moves.append(position + self.width * 2)
             if self.en_passant != False:
                 if position % self.width != 0:
-                    if self.en_passant == position + 7:
-                        possible_moves.append(position + 7)
-                if position % self.width != 7:
-                    if self.en_passant == position + 9:
-                        possible_moves.append(position + 9)
+                    if self.en_passant == position + (self.width - 1):
+                        possible_moves.append(position + (self.width - 1))
+                if position % self.width != (self.width - 1):
+                    if self.en_passant == position + (self.width + 1):
+                        possible_moves.append(position + (self.width + 1))
             return possible_moves
+
+    def white_knight_possible_moves(self, position):
+        possible_moves = []
+        if position % self.width < (self.width - 2):
+            if position > (self.width - 1):
+                possible_moves.append(position - (self.width - 2))
+            if position < ((self.height - 1) * self.width):
+                possible_moves.append((position + (self.width + 2)))
+        if position % self.width > 1:
+            if position > (self.width - 2):
+                possible_moves.append(position - (self.width + 2))
+            if position < ((self.height - 1) * self.width):
+                possible_moves.append(position + (self.width - 2))
+        if position > (self.width * 2) - 1:
+            if position % self.width < (self.width - 1):
+                possible_moves.append(position - (self.width * 2) + 1)
+            if position % self.width > 0:
+                possible_moves.append(position - (self.width * 2) - 1)
+        if position < ((self.height - 2) * self.width):
+            if position % self.width < (self.width - 1):
+                possible_moves.append(position + (self.width * 2) + 1)
+            if position % self.width > 0:
+                possible_moves.append(position + (self.width * 2) - 1)
+        for i in possible_moves:
+            if self.board[i] & self.white:
+                possible_moves.remove(i)
+        return possible_moves
+
+    def black_knight_possible_moves(self, position):
+        possible_moves = []
+        if position % self.width < (self.width - 2):
+            if position > (self.width - 1):
+                possible_moves.append(position - (self.width - 2))
+            if position < ((self.height - 1) * self.width):
+                possible_moves.append((position + (self.width + 2)))
+        if position % self.width > 1:
+            if position > (self.width - 2):
+                possible_moves.append(position - (self.width + 2))
+            if position < ((self.height - 1) * self.width):
+                possible_moves.append(position + (self.width - 2))
+        if position > (self.width * 2) - 1:
+            if position % self.width < (self.width - 1):
+                possible_moves.append(position - (self.width * 2) + 1)
+            if position % self.width > 0:
+                possible_moves.append(position - (self.width * 2) - 1)
+        if position < ((self.height - 2) * self.width):
+            if position % self.width < (self.width - 1):
+                possible_moves.append(position + (self.width * 2) + 1)
+            if position % self.width > 0:
+                possible_moves.append(position + (self.width * 2) - 1)
+        for i in possible_moves:
+            if self.board[i] & self.black:
+                possible_moves.remove(i)
+        return possible_moves
+
     def possible_moves(self, position):
         if self.board[position] & self.pawn:
             if self.board[position] & self.white:
                 return self.white_pawn_possible_moves(position)
-
 
     def set_up(self):
         self.FEN_to_binary('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
@@ -158,66 +213,90 @@ class chess_board:
 
 class chess_terminal:
 
-
-
-    def print_board(self):
+    def print_board(self, hovered_field = None, possible_moves=[]):
         text = ''
-        for i in range(-1, self.chess_board.height+1):
-            for j in range(-1, self.chess_board.width+1):
+        for i in range(-1, self.chess_board.height + 1):
+            for j in range(-1, self.chess_board.width + 1):
                 if i == -1:
                     if j == -1 or j == self.chess_board.width:
                         text += self.colour.ansi_text_and_background_coloring("   ", "white", "dark_brown")
                     else:
-                        text += self.colour.ansi_text_and_background_coloring(" " + self.int2letter(j) + " ", "white", "dark_brown")
+                        text += self.colour.ansi_text_and_background_coloring(" " + self.int2letter(j) + " ", "white",
+                                                                              "dark_brown")
                 elif j == -1:
                     if i == self.chess_board.height:
                         text += self.colour.ansi_text_and_background_coloring("   ", "white", "dark_brown")
                     else:
-                        text += self.colour.ansi_text_and_background_coloring(" " + str(self.chess_board.height-i) + " ", "white", "dark_brown")
+                        text += self.colour.ansi_text_and_background_coloring(
+                            " " + str(self.chess_board.height - i) + " ", "white", "dark_brown")
                 elif i == self.chess_board.height:
                     if j == -1 or j == self.chess_board.width:
                         text += self.colour.ansi_text_and_background_coloring("   ", "white", "dark_brown")
                     else:
-                        text += self.colour.ansi_text_and_background_coloring(" " + self.int2letter(j) + " ", "white", "dark_brown")
+                        text += self.colour.ansi_text_and_background_coloring(" " + self.int2letter(j) + " ", "white",
+                                                                              "dark_brown")
                 elif j == self.chess_board.width:
                     if i == -1:
                         text += self.colour.ansi_text_and_background_coloring("   ", "white", "dark_brown")
                     else:
-                        text += self.colour.ansi_text_and_background_coloring(" " + str(self.chess_board.height-i) + " ", "white", "dark_brown")
+                        text += self.colour.ansi_text_and_background_coloring(
+                            " " + str(self.chess_board.height - i) + " ", "white", "dark_brown")
                 else:
                     if (i + j) % 2 == 0:
                         backround = "white"
                     else:
                         backround = "black"
-                    if self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.pawn | self.chess_board.white):
+                    if i * self.chess_board.height + j in possible_moves:
+                        if  backround == "white":
+                            backround = "light_red"
+                        else:
+                            backround = "red"
+                    if i * self.chess_board.height + j == hovered_field:
+                        if backround == "white":
+                            backround = "hover_red"
+                        else:
+                            backround = "hover_dark_red"
+                    if self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.pawn | self.chess_board.white):
                         text += self.colour.ansi_text_and_background_coloring(" P ", "full_white", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.pawn | self.chess_board.black):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.pawn | self.chess_board.black):
                         text += self.colour.ansi_text_and_background_coloring(" P ", "full_black", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.knight | self.chess_board.white):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.knight | self.chess_board.white):
                         text += self.colour.ansi_text_and_background_coloring(" N ", "full_white", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.knight | self.chess_board.black):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.knight | self.chess_board.black):
                         text += self.colour.ansi_text_and_background_coloring(" N ", "full_black", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.bishop | self.chess_board.white):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.bishop | self.chess_board.white):
                         text += self.colour.ansi_text_and_background_coloring(" B ", "full_white", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.bishop | self.chess_board.black):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.bishop | self.chess_board.black):
                         text += self.colour.ansi_text_and_background_coloring(" B ", "full_black", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.rook | self.chess_board.white):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.rook | self.chess_board.white):
                         text += self.colour.ansi_text_and_background_coloring(" R ", "full_white", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.rook | self.chess_board.black):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.rook | self.chess_board.black):
                         text += self.colour.ansi_text_and_background_coloring(" R ", "full_black", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.queen | self.chess_board.white):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.queen | self.chess_board.white):
                         text += self.colour.ansi_text_and_background_coloring(" Q ", "full_white", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.queen | self.chess_board.black):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.queen | self.chess_board.black):
                         text += self.colour.ansi_text_and_background_coloring(" Q ", "full_black", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.king | self.chess_board.white):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.king | self.chess_board.white):
                         text += self.colour.ansi_text_and_background_coloring(" K ", "full_white", backround)
-                    elif self.chess_board.board[i * self.chess_board.width + j] == (self.chess_board.king | self.chess_board.black):
+                    elif self.chess_board.board[i * self.chess_board.width + j] == (
+                            self.chess_board.king | self.chess_board.black):
                         text += self.colour.ansi_text_and_background_coloring(" K ", "full_black", backround)
                     else:
-                        text += self.colour.ansi_background_coloring(str( i * self.chess_board.height + j)+" ", backround)
+                        text += self.colour.ansi_background_coloring(str(i * self.chess_board.height + j) + " ",
+                                                                     backround)
             text += "\n"
         print(text)
-
 
     def __init__(self, chess_board):
         import friedas_lil_lib as fll
@@ -229,9 +308,10 @@ class chess_terminal:
             'white': "#F0D9B5",
             'full_black': "#000000",
             'full_white': "#FFFFFF",
-            'dark_brown': "#432C1C"
+            'dark_brown': "#432C1C",
+            'light_red': "#D07979",
+            'red': "#E63F3F",
+            'hover_red': "#A21313",
+            'hover_dark_red': "#730505"
         })
         self.chess_board = chess_board
-
-
-

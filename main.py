@@ -3,12 +3,9 @@ def main():
     chess_board = chess.chess_board()
     chess_terminal = chess.chess_terminal(chess_board)
     chess_board.set_up()
-    chess_terminal.print_board()
-    print(chess_board.white_pawn_possible_moves(52))
-    print(chess_board.white_pawn_possible_moves(44))
-    print(chess_board.white_pawn_possible_moves(28))
-    print(chess_board.black_pawn_possible_moves(11))
-
+    chess_terminal.print_board(hovered_field=57, possible_moves=chess_board.white_knight_possible_moves(57))
+    print(chess_board.white_knight_possible_moves(16))
+    print(chess_board.white_knight_possible_moves(40))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
