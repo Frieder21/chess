@@ -72,6 +72,21 @@ class chess_board:
         self.halfmove_clock = int(FEN[4])
         self.fullmove_number = int(FEN[5])
 
+    def moves_in_direction(self, position: int, direction: int, color: bin) -> list:
+        possible_moves = []
+        while True:
+            position += direction
+            if position < 0 or position >= self.height * self.width:
+                break
+            if self.board[position] == 0:
+                possible_moves.append(position)
+            elif self.board[position] & color:
+                break
+            else:
+                possible_moves.append(position)
+                break
+        return possible_moves
+
     def white_pawn_possible_moves(self, position):
         if position < self.height:
             return []
@@ -176,6 +191,22 @@ class chess_board:
                 possible_moves.remove(i)
         return possible_moves
 
+    def white_bishop_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width - 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width + 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width - 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width + 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
     def possible_moves(self, position):
         if self.board[position] & self.pawn:
             if self.board[position] & self.white:
@@ -213,7 +244,7 @@ class chess_board:
 
 class chess_terminal:
 
-    def print_board(self, hovered_field = None, possible_moves=[]):
+    def print_board(self, hovered_field=None, possible_moves=[]):
         text = ''
         for i in range(-1, self.chess_board.height + 1):
             for j in range(-1, self.chess_board.width + 1):
@@ -247,7 +278,7 @@ class chess_terminal:
                     else:
                         backround = "black"
                     if i * self.chess_board.height + j in possible_moves:
-                        if  backround == "white":
+                        if backround == "white":
                             backround = "light_red"
                         else:
                             backround = "red"
