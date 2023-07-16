@@ -207,10 +207,209 @@ class chess_board:
             possible_moves.extend(list)
         return possible_moves
 
+    def black_bishop_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width - 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width + 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width - 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width + 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
+    def white_rook_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
+    def black_rook_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
+    def white_queen_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width - 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width + 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width - 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width + 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, 1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -1, self.white)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
+    def black_queen_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width - 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width + 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width - 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width + 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
+    def white_king_possible_moves(self, position):
+        print(position)
+        possible_moves = [position-self.width-1, position-self.width, position-self.width+1,
+                          position-1, position+1,
+                          position+self.width+1, position+self.width, position+self.width+1]
+        for i in possible_moves:
+            if not self.board[i] & self.white:
+                print(i)
+                is_king = [self.board[i]-self.width-1, self.board[i]-self.width, self.board[i]-self.width+1,
+                          self.board[i]-1, self.board[i]+1,
+                          self.board[i]+self.width+1, self.board[i]+self.width, self.board[i]+self.width+1]
+                for j in is_king:
+                    print(j)
+
+
+    def black_king_possible_moves(self, position):
+        possible_moves = []
+        list = self.moves_in_direction(position, self.width - 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width + 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width - 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width + 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, self.width, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -self.width, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, 1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        list = self.moves_in_direction(position, -1, self.black)
+        if list != []:
+            possible_moves.extend(list)
+        return possible_moves
+
     def possible_moves(self, position):
         if self.board[position] & self.pawn:
             if self.board[position] & self.white:
-                return self.white_pawn_possible_moves(position)
+                return "pawn", self.white_pawn_possible_moves(position)
+            else:
+                return "pawn", self.black_pawn_possible_moves(position)
+        elif self.board[position] & self.knight:
+            if self.board[position] & self.white:
+                return "knight", self.white_knight_possible_moves(position)
+            else:
+                return "knight", self.black_knight_possible_moves(position)
+        elif self.board[position] & self.bishop:
+            if self.board[position] & self.white:
+                return "bishop", self.white_bishop_possible_moves(position)
+            else:
+                return "bishop", self.black_bishop_possible_moves(position)
+        elif self.board[position] & self.rook:
+            if self.board[position] & self.white:
+                return "rock", self.white_rook_possible_moves(position)
+            else:
+                return "rock", self.black_rook_possible_moves(position)
+        elif self.board[position] & self.queen:
+            if self.board[position] & self.white:
+                return "queen", self.white_queen_possible_moves(position)
+            else:
+                return "queen", self.black_queen_possible_moves(position)
+        elif self.board[position] & self.king:
+            if self.board[position] & self.white:
+                return "king", self.white_king_possible_moves(position)
+            else:
+                return "king", self.black_king_possible_moves(position)
+        else:
+            return []
+
+    def all_possible_moves_side(self, color):
+        possible_moves = {}
+        possible_moves_piece = {}
+        if color == "white":
+            for i in range(self.height*self.width):
+                if self.board[i] & self.white:
+                    moves = self.possible_moves(i)
+                    if moves[1] != []:
+                        possible_moves[i] = moves[1]
+                        if not str(moves[0]) in possible_moves_piece:
+                            possible_moves_piece[str(moves[0])] = {}
+                        possible_moves_piece[str(moves[0])][i] = moves[1]
+        elif color == "black":
+            for i in range(self.height*self.width):
+                if self.board[i] & self.black:
+                    moves = self.possible_moves(i)
+                    if moves[1] != []:
+                        possible_moves[i] = moves[1]
+                        if not str(moves[0]) in possible_moves_piece:
+                            possible_moves_piece[str(moves[0])] = {}
+                        possible_moves_piece[str(moves[0])][i] = moves[1]
+        return possible_moves_piece
 
     def set_up(self):
         self.FEN_to_binary('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
