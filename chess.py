@@ -312,19 +312,24 @@ class chess_board:
         return possible_moves
 
     def white_king_possible_moves(self, position):
-        print(position)
-        possible_moves = [position-self.width-1, position-self.width, position-self.width+1,
-                          position-1, position+1,
-                          position+self.width+1, position+self.width, position+self.width+1]
+        possible_moves_return = []
+        possible_moves = [position - self.width - 1, position - self.width, position - self.width + 1,
+                          position - 1, position + 1,
+                          position + self.width + 1, position + self.width, position + self.width + 1]
         for i in possible_moves:
-            if not self.board[i] & self.white:
-                print(i)
-                is_king = [self.board[i]-self.width-1, self.board[i]-self.width, self.board[i]-self.width+1,
-                          self.board[i]-1, self.board[i]+1,
-                          self.board[i]+self.width+1, self.board[i]+self.width, self.board[i]+self.width+1]
-                for j in is_king:
-                    print(j)
-
+            if 0 < i < self.height * self.width:
+                if not self.board[i] & self.white:
+                    is_king = [i - self.width - 1, i - self.width, i - self.width + 1,
+                               i - 1, i + 1,
+                               i + self.width + 1, i + self.width, i + self.width + 1]
+                    allowed = True
+                    for j in is_king:
+                        if 0 < i < self.height * self.width:
+                            if self.board[j] & self.king | self.black:
+                                allowed = False
+                    if allowed:
+                        possible_moves_return.append(i)
+        return possible_moves_return
 
     def black_king_possible_moves(self, position):
         possible_moves = []
@@ -355,44 +360,47 @@ class chess_board:
         return possible_moves
 
     def possible_moves(self, position):
-        if self.board[position] & self.pawn:
-            if self.board[position] & self.white:
-                return "pawn", self.white_pawn_possible_moves(position)
-            else:
-                return "pawn", self.black_pawn_possible_moves(position)
-        elif self.board[position] & self.knight:
-            if self.board[position] & self.white:
-                return "knight", self.white_knight_possible_moves(position)
-            else:
-                return "knight", self.black_knight_possible_moves(position)
-        elif self.board[position] & self.bishop:
-            if self.board[position] & self.white:
-                return "bishop", self.white_bishop_possible_moves(position)
-            else:
-                return "bishop", self.black_bishop_possible_moves(position)
-        elif self.board[position] & self.rook:
-            if self.board[position] & self.white:
-                return "rock", self.white_rook_possible_moves(position)
-            else:
-                return "rock", self.black_rook_possible_moves(position)
-        elif self.board[position] & self.queen:
-            if self.board[position] & self.white:
-                return "queen", self.white_queen_possible_moves(position)
-            else:
-                return "queen", self.black_queen_possible_moves(position)
-        elif self.board[position] & self.king:
-            if self.board[position] & self.white:
-                return "king", self.white_king_possible_moves(position)
-            else:
-                return "king", self.black_king_possible_moves(position)
+        if self.board[position] == self.pawn + self.white:
+            return "pawn", self.white_pawn_possible_moves(position)
+        elif self.board[position] == self.pawn + self.black:
+            return "pawn", self.black_pawn_possible_moves(position)
+        elif self.board[position] == self.knight + self.white:
+            return "knight", self.white_knight_possible_moves(position)
+        elif self.board[position] == self.knight + self.black:
+            return "knight", self.black_knight_possible_moves(position)
+        elif self.board[position] == self.bishop + self.white:
+            return "bishop", self.white_bishop_possible_moves(position)
+        elif self.board[position] == self.bishop + self.black:
+            return "bishop", self.black_bishop_possible_moves(position)
+        elif self.board[position] == self.rook + self.white:
+            return "rock", self.white_rook_possible_moves(position)
+        elif self.board[position] == self.rook + self.black:
+            return "rock", self.black_rook_possible_moves(position)
+        elif self.board[position] == self.queen + self.white:
+            return "queen", self.white_queen_possible_moves(position)
+        elif self.board[position] == self.queen + self.black:
+            return "queen", self.black_queen_possible_moves(position)
+        elif self.board[position] == self.king + self.white:
+            return "king", self.white_king_possible_moves(position)
+        elif self.board[position] == self.king + self.black:
+            return "king", self.black_king_possible_moves(position)
         else:
-            return []
+            return [], []
 
-    def all_possible_moves_side(self, color):
+    def move_possible(self, start_pos: int, end_pos: int) -> bool:
+        """
+
+        :param start_pos:
+        :param end_pos:
+        :return:
+        """
+        return end_pos in self.possible_moves(start_pos)[1]
+
+    def all_possible_moves_side(self, color, with_piece_type: bool = False):
         possible_moves = {}
         possible_moves_piece = {}
         if color == "white":
-            for i in range(self.height*self.width):
+            for i in range(self.height * self.width):
                 if self.board[i] & self.white:
                     moves = self.possible_moves(i)
                     if moves[1] != []:
@@ -401,7 +409,7 @@ class chess_board:
                             possible_moves_piece[str(moves[0])] = {}
                         possible_moves_piece[str(moves[0])][i] = moves[1]
         elif color == "black":
-            for i in range(self.height*self.width):
+            for i in range(self.height * self.width):
                 if self.board[i] & self.black:
                     moves = self.possible_moves(i)
                     if moves[1] != []:
@@ -409,7 +417,10 @@ class chess_board:
                         if not str(moves[0]) in possible_moves_piece:
                             possible_moves_piece[str(moves[0])] = {}
                         possible_moves_piece[str(moves[0])][i] = moves[1]
-        return possible_moves_piece
+        if with_piece_type:
+            return possible_moves_piece
+        else:
+            return possible_moves
 
     def set_up(self):
         self.FEN_to_binary('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
