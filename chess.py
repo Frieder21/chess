@@ -332,32 +332,24 @@ class chess_board:
         return possible_moves_return
 
     def black_king_possible_moves(self, position):
-        possible_moves = []
-        list = self.moves_in_direction(position, self.width - 1, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, self.width + 1, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, -self.width - 1, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, -self.width + 1, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, self.width, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, -self.width, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, 1, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        list = self.moves_in_direction(position, -1, self.black)
-        if list != []:
-            possible_moves.extend(list)
-        return possible_moves
+        possible_moves_return = []
+        possible_moves = [position - self.width - 1, position - self.width, position - self.width + 1,
+                          position - 1, position + 1,
+                          position + self.width + 1, position + self.width, position + self.width + 1]
+        for i in possible_moves:
+            if 0 < i < self.height * self.width:
+                if not self.board[i] & self.black:
+                    is_king = [i - self.width - 1, i - self.width, i - self.width + 1,
+                               i - 1, i + 1,
+                               i + self.width + 1, i + self.width, i + self.width + 1]
+                    allowed = True
+                    for j in is_king:
+                        if 0 < i < self.height * self.width:
+                            if self.board[j] & self.king | self.white:
+                                allowed = False
+                    if allowed:
+                        possible_moves_return.append(i)
+        return possible_moves_return
 
     def possible_moves(self, position):
         if self.board[position] == self.pawn + self.white:
