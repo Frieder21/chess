@@ -329,6 +329,13 @@ class chess_board:
                                 allowed = False
                     if allowed:
                         possible_moves_return.append(i)
+                    print(i)
+        if "K" in self.castling:
+            if self.board[position + 1] == 0 and self.board[position + 2] == 0:
+                possible_moves_return.append(position + 2)
+        if "Q" in self.castling:
+            if self.board[position - 1] == 0 and self.board[position - 2] == 0 and self.board[position - 3] == 0:
+                possible_moves_return.append(position - 2)
         return possible_moves_return
 
     def black_king_possible_moves(self, position):
@@ -349,6 +356,12 @@ class chess_board:
                                 allowed = False
                     if allowed:
                         possible_moves_return.append(i)
+        if "k" in self.castling:
+            if self.board[position + 1] == 0 and self.board[position + 2] == 0:
+                possible_moves_return.append(position + 2)
+        if "q" in self.castling:
+            if self.board[position - 1] == 0 and self.board[position - 2] == 0 and self.board[position - 3] == 0:
+                possible_moves_return.append(position - 2)
         return possible_moves_return
 
     def possible_moves(self, position):
@@ -387,6 +400,80 @@ class chess_board:
         :return:
         """
         return end_pos in self.possible_moves(start_pos)[1]
+
+
+    def do_move(self, start_pos: int, end_pos: int) -> None:
+        """
+
+        :param start_pos:
+        :param end_pos:
+        :return:
+        """
+        if self.move_possible(start_pos, end_pos):
+            if self.board[start_pos] == self.pawn + self.white:
+                if self.en_passant != False:
+                    if start_pos % self.width != 0 and self.en_passant == start_pos - (self.width + 1):
+                        self.board[start_pos - 1] = 0
+                    if start_pos % self.width != (self.width - 1) and self.en_passant == start_pos - (self.width - 1):
+                        self.board[start_pos + 1] = 0
+                if end_pos - start_pos == 2 * self.width:
+                    self.en_passant = end_pos - self.width
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.pawn + self.white
+            elif self.board[start_pos] == self.pawn + self.black:
+                if self.en_passant != False:
+                    if start_pos % self.width != 0 and self.en_passant == start_pos + (self.width - 1):
+                        self.board[start_pos - 1] = 0
+                    if start_pos % self.width != (self.width - 1) and self.en_passant == start_pos + (self.width + 1):
+                        self.board[start_pos + 1] = 0
+                if end_pos - start_pos == -2 * self.width:
+                    self.en_passant = end_pos + self.width
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.pawn + self.black
+            elif self.board[start_pos] == self.king + self.white:
+                if start_pos == self.white_king_pos and end_pos == self.white_king_pos + 2:
+                    self.board[start_pos + 3] = 0
+                    self.board[start_pos + 1] = self.rook + self.white
+                elif start_pos == self.white_king_pos and end_pos == self.white_king_pos - 2:
+                    self.board[start_pos - 4] = 0
+                    self.board[start_pos -1] = self.rook + self.white
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.king + self.white
+                self.castling = self.castling.replace("K", "")
+                self.castling = self.castling.replace("Q", "")
+            elif self.board[start_pos] == self.king + self.black:
+                if start_pos == self.black_king_pos and end_pos == self.black_king_pos + 2:
+                    self.board[start_pos + 3] = 0
+                    self.board[start_pos + 1] = self.rook + self.black
+                elif start_pos == self.black_king_pos and end_pos == self.black_king_pos - 2:
+                    self.board[start_pos - 4] = 0
+                    self.board[start_pos - 1] = self.rook + self.black
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.king + self.black
+                self.castling = self.castling.replace("k", "")
+                self.castling = self.castling.replace("q", "")
+            elif self.board[start_pos] == self.rook + self.white:
+                if start_pos == self.white_rook_pos[0]:
+                    self.castling = self.castling.replace("Q", "")
+                elif start_pos == self.white_rook_pos[1]:
+                    self.castling = self.castling.replace("K", "")
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.rook + self.white
+            elif self.board[start_pos] == self.rook + self.black:
+                if start_pos == self.black_rook_pos[0]:
+                    self.castling = self.castling.replace("q", "")
+                elif start_pos == self.black_rook_pos[1]:
+                    self.castling = self.castling.replace("k", "")
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.rook + self.black
+            else:
+                self.board[start_pos] = 0
+                self.board[end_pos] = self.board[start_pos]
+
+
+
+
+
 
     def all_possible_moves_side(self, color, with_piece_type: bool = False):
         possible_moves = {}
@@ -436,6 +523,10 @@ class chess_board:
         self.king = 0b00110
         self.white = 0b01000
         self.black = 0b10000
+        self.white_king_pos = 4
+        self.black_king_pos = 60
+        self.white_rook_pos = [self.width*(self.height-1), self.width*self.height-1]
+        self.black_rook_pos = [0, self.width-1]
         self.moving_side = None
         self.en_passant = None
         self.castling = None
@@ -531,9 +622,19 @@ class chess_terminal:
             text += "\n"
         print(text)
 
+    def clear(self):
+        clear_text = ""
+        for i in range(self.chess_board.height+3):
+            for j in range(self.chess_board.width+3):
+                clear_text += "   "
+            clear_text += "\n"
+        self.c2s(clear_text)
+
+
     def __init__(self, chess_board):
         import friedas_lil_lib as fll
         self.i2l_l2i = fll.letter_and_int()
+        self.c2s = fll.clear_to_start
         self.int2letter = self.i2l_l2i.int_to_caps_letter
         self.letter2int = self.i2l_l2i.caps_letter_to_int
         self.colour = fll.colour({
