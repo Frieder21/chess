@@ -410,6 +410,8 @@ class chess_board:
         :return:
         """
         if self.move_possible(start_pos, end_pos):
+            self.move_list.append(
+                (start_pos, end_pos, self.board[start_pos], self.board[end_pos], self.en_passant, self.castling))
             if self.board[start_pos] == self.pawn + self.white:
                 if self.en_passant != False:
                     if start_pos % self.width != 0 and self.en_passant == start_pos - (self.width + 1):
@@ -472,6 +474,20 @@ class chess_board:
 
 
 
+    def undo_move(self) -> None:
+        """
+
+        :return:
+        """
+        if len(self.move_list) > 0:
+            move = self.move_list.pop()
+            self.board[move[0]] = move[2]
+            self.board[move[1]] = move[3]
+            self.en_passant = move[4]
+            self.castling = move[5]
+
+
+
 
 
 
@@ -503,6 +519,7 @@ class chess_board:
 
     def set_up(self):
         self.FEN_to_binary('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+        self.move_list = []
 
     def binary_to_FEN(self):
         pass
@@ -532,6 +549,7 @@ class chess_board:
         self.castling = None
         self.halfmove_clock = None
         self.fullmove_number = None
+        self.move_list = []
         self.FEN_to_binary('rnbqkbnr/pp2pppp/2p5/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3')
 
 

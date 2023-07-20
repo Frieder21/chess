@@ -9,8 +9,27 @@ def count_possible_moves_side(possible_moves: dict) -> int:
     else:
         return "wrong dict"
 
-def do_moves_deep(colour:str="white", deep:int=2):
-    pass
+def do_moves_deep(chess_board, color:str="white", deep:int=2)->dict:
+    if deep == 0:
+        return {}
+    else:
+        possible_moves = chess_board.all_possible_moves_side(color=color)
+
+        if count_possible_moves_side(possible_moves) == 0:
+            return {}
+        else:
+            moves = {}
+            if color == "white":
+                color = "black"
+            elif color == "black":
+                color = "white"
+            for i in possible_moves:
+                for j in possible_moves[i]:
+                    chess_board.do_move(i, j)
+                    moves[i, j] = do_moves_deep(chess_board, color, deep-1)
+                    chess_board.undo_move()
+            return moves
+
 
 def main():
     import chess
@@ -41,6 +60,9 @@ def main():
     chess_terminal.clear()
     chess_board.do_move(36, 27)
     chess_terminal.print_board()
+    chess_board.set_up()
+    chess_terminal.print_board()
+    print(do_moves_deep(chess_board, "white", 2))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
