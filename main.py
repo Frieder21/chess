@@ -9,13 +9,13 @@ def count_possible_moves_side(possible_moves: dict) -> int:
     else:
         return "wrong dict"
 
-def do_moves_deep(chess_board, color:str="white", deep:int=2)->dict:
+
+def do_moves_deep(chess_board, color: str = "white", deep: int = 2) -> dict:
     if deep == 0:
         return {}
     else:
         possible_moves = chess_board.all_possible_moves_side(color=color)
-
-        if count_possible_moves_side(possible_moves) == 0:
+        if possible_moves == {}:
             return {}
         else:
             moves = {}
@@ -26,9 +26,26 @@ def do_moves_deep(chess_board, color:str="white", deep:int=2)->dict:
             for i in possible_moves:
                 for j in possible_moves[i]:
                     chess_board.do_move(i, j)
-                    moves[i, j] = do_moves_deep(chess_board, color, deep-1)
+                    moves[str(i) + ", " + str(j)] = do_moves_deep(chess_board, color, deep - 1)
                     chess_board.undo_move()
             return moves
+
+
+def deep_search(dict: dict, deep: int = 2) -> int:
+    count = 0
+    if deep == 0:
+        return 0
+    for i in dict:
+        if dict[i] == {}:
+            count += 1
+        else:
+            count += deep_search(dict[i], deep - 1)
+    return count
+
+
+def count_possible_moves_deep(chess_board, color: str = "white", deep: int = 2) -> int:
+    dict = do_moves_deep(chess_board, color, deep)
+    return deep_search(dict, deep)
 
 
 def main():
@@ -38,31 +55,7 @@ def main():
     chess_board = chess.chess_board()
     chess_terminal = chess.chess_terminal(chess_board)
     chess_board.set_up()
-    chess_terminal.print_board()
-    time.sleep(1)
-    chess_terminal.clear()
-    chess_terminal.print_board(hovered_field=52, possible_moves=chess_board.possible_moves(52)[1])
-    time.sleep(1)
-    chess_terminal.clear()
-    chess_board.do_move(52, 36)
-    chess_terminal.print_board()
-    time.sleep(1)
-    chess_terminal.clear()
-    chess_terminal.print_board(hovered_field=11, possible_moves=chess_board.possible_moves(11)[1])
-    time.sleep(1)
-    chess_terminal.clear()
-    chess_board.do_move(11, 27)
-    chess_terminal.print_board()
-    time.sleep(1)
-    chess_terminal.clear()
-    chess_terminal.print_board(hovered_field=36, possible_moves=chess_board.possible_moves(36)[1])
-    time.sleep(1)
-    chess_terminal.clear()
-    chess_board.do_move(36, 27)
-    chess_terminal.print_board()
-    chess_board.set_up()
-    chess_terminal.print_board()
-    print(do_moves_deep(chess_board, "white", 2))
+    print(count_possible_moves_deep(chess_board, "white", 4))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

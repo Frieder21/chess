@@ -329,7 +329,6 @@ class chess_board:
                                 allowed = False
                     if allowed:
                         possible_moves_return.append(i)
-                    print(i)
         if "K" in self.castling:
             if self.board[position + 1] == 0 and self.board[position + 2] == 0:
                 possible_moves_return.append(position + 2)
