@@ -78,6 +78,12 @@ class chess_board:
             position += direction
             if position < 0 or position >= self.height * self.width:
                 break
+            if position % self.width == 0 and direction in [-1, -9, 7]:
+                possible_moves.append(position)
+                break
+            if position % self.width == (self.width - 1) and direction in [1, 9, -7]:
+                possible_moves.append(position)
+                break
             if self.board[position] == 0:
                 possible_moves.append(position)
             elif self.board[position] & color:
@@ -159,10 +165,11 @@ class chess_board:
                 possible_moves.append(position + (self.width * 2) + 1)
             if position % self.width > 0:
                 possible_moves.append(position + (self.width * 2) - 1)
+        possible_moves_without_wrong = possible_moves.copy()
         for i in possible_moves:
             if self.board[i] & self.white:
-                possible_moves.remove(i)
-        return possible_moves
+                possible_moves_without_wrong.remove(i)
+        return possible_moves_without_wrong
 
     def black_knight_possible_moves(self, position):
         possible_moves = []
@@ -186,10 +193,11 @@ class chess_board:
                 possible_moves.append(position + (self.width * 2) + 1)
             if position % self.width > 0:
                 possible_moves.append(position + (self.width * 2) - 1)
+        possible_moves_without_wrong = possible_moves.copy()
         for i in possible_moves:
             if self.board[i] & self.black:
-                possible_moves.remove(i)
-        return possible_moves
+                possible_moves_without_wrong.remove(i)
+        return possible_moves_without_wrong
 
     def white_bishop_possible_moves(self, position):
         possible_moves = []
@@ -324,7 +332,7 @@ class chess_board:
                                i + self.width + 1, i + self.width, i + self.width + 1]
                     allowed = True
                     for j in is_king:
-                        if 0 < i < self.height * self.width:
+                        if 0 < i < self.height * self.width and 0 < j < self.height * self.width:
                             if self.board[j] & self.king | self.black:
                                 allowed = False
                     if allowed:
@@ -350,7 +358,7 @@ class chess_board:
                                i + self.width + 1, i + self.width, i + self.width + 1]
                     allowed = True
                     for j in is_king:
-                        if 0 < i < self.height * self.width:
+                        if 0 < i < self.height * self.width and 0 < j < self.height * self.width:
                             if self.board[j] & self.king | self.white:
                                 allowed = False
                     if allowed:
@@ -468,8 +476,8 @@ class chess_board:
                 self.board[start_pos] = 0
                 self.board[end_pos] = self.rook + self.black
             else:
-                self.board[start_pos] = 0
                 self.board[end_pos] = self.board[start_pos]
+                self.board[start_pos] = 0
 
 
 
@@ -523,6 +531,26 @@ class chess_board:
     def binary_to_FEN(self):
         pass
 
+
+    def perft(self, deep: int, color: str = "white") -> int:
+        if deep == 0:
+            return 1
+        else:
+            possible_moves = self.all_possible_moves_side(color=color)
+            if possible_moves == {}:
+                return 0
+            else:
+                moves = 0
+                if color == "white":
+                    color = "black"
+                elif color == "black":
+                    color = "white"
+                for i in possible_moves:
+                    for j in possible_moves[i]:
+                        self.do_move(i, j)
+                        moves += self.perft(deep - 1, color)
+                        self.undo_move()
+                return moves
     def __init__(self):
         import friedas_lil_lib as fll
         self.i2l_l2i = fll.letter_and_int()
@@ -554,7 +582,7 @@ class chess_board:
 
 class chess_terminal:
 
-    def print_board(self, hovered_field=None, possible_moves=[]):
+    def print_board(self, hovered_field=None, possible_moves=[], debug=False):
         text = ''
         for i in range(-1, self.chess_board.height + 1):
             for j in range(-1, self.chess_board.width + 1):
@@ -584,71 +612,98 @@ class chess_terminal:
                             " " + str(self.chess_board.height - i) + " ", "white", "dark_brown")
                 else:
                     if (i + j) % 2 == 0:
-                        backround = "white"
+                        background = "white"
                     else:
-                        backround = "black"
+                        background = "black"
                     if i * self.chess_board.height + j in possible_moves:
-                        if backround == "white":
-                            backround = "light_red"
+                        if background == "white":
+                            background = "light_red"
                         else:
-                            backround = "red"
+                            background = "red"
                     if i * self.chess_board.height + j == hovered_field:
-                        if backround == "white":
-                            backround = "hover_red"
+                        if background == "white":
+                            background = "hover_red"
                         else:
-                            backround = "hover_dark_red"
+                            background = "hover_dark_red"
                     if self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.pawn | self.chess_board.white):
-                        text += self.colour.ansi_text_and_background_coloring(" P ", "full_white", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" P ", "full_white", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.pawn | self.chess_board.black):
-                        text += self.colour.ansi_text_and_background_coloring(" P ", "full_black", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" P ", "full_black", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.knight | self.chess_board.white):
-                        text += self.colour.ansi_text_and_background_coloring(" N ", "full_white", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" N ", "full_white", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.knight | self.chess_board.black):
-                        text += self.colour.ansi_text_and_background_coloring(" N ", "full_black", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" N ", "full_black", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.bishop | self.chess_board.white):
-                        text += self.colour.ansi_text_and_background_coloring(" B ", "full_white", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" B ", "full_white", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.bishop | self.chess_board.black):
-                        text += self.colour.ansi_text_and_background_coloring(" B ", "full_black", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" B ", "full_black", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.rook | self.chess_board.white):
-                        text += self.colour.ansi_text_and_background_coloring(" R ", "full_white", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" R ", "full_white", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.rook | self.chess_board.black):
-                        text += self.colour.ansi_text_and_background_coloring(" R ", "full_black", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" R ", "full_black", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.queen | self.chess_board.white):
-                        text += self.colour.ansi_text_and_background_coloring(" Q ", "full_white", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" Q ", "full_white", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.queen | self.chess_board.black):
-                        text += self.colour.ansi_text_and_background_coloring(" Q ", "full_black", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" Q ", "full_black", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.king | self.chess_board.white):
-                        text += self.colour.ansi_text_and_background_coloring(" K ", "full_white", backround)
+                        text += self.colour.ansi_text_and_background_coloring(" K ", "full_white", background)
                     elif self.chess_board.board[i * self.chess_board.width + j] == (
                             self.chess_board.king | self.chess_board.black):
-                        text += self.colour.ansi_text_and_background_coloring(" K ", "full_black", backround)
-                    else:
+                        text += self.colour.ansi_text_and_background_coloring(" K ", "full_black", background)
+                    elif debug:
                         text += self.colour.ansi_background_coloring(str(i * self.chess_board.height + j) + " ",
-                                                                     backround)
+                                                                     background)
+                    else:
+                        text += self.colour.ansi_text_and_background_coloring("   ", "white", background)
             text += "\n"
         print(text)
 
-    def clear(self):
-        clear_text = ""
+    def create_clear_text(self):
+        self.clear_text = ""
         for i in range(self.chess_board.height+3):
             for j in range(self.chess_board.width+3):
-                clear_text += "   "
-            clear_text += "\n"
-        self.c2s(clear_text)
+                self.clear_text += "   "
+            self.clear_text += "\n"
+    def clear(self):
+        self.c2s(self.clear_text)
 
+    def perft_terminal(self, color: str = "white", deep: int = 2) -> int:
+        if deep == 0:
+            return 1
+        else:
+            possible_moves = self.chess_board.all_possible_moves_side(color=color)
+            if possible_moves == {}:
+                return 0
+            else:
+                moves = 0
+                if color == "white":
+                    color = "black"
+                elif color == "black":
+                    color = "white"
+                for i in possible_moves:
+                    for j in possible_moves[i]:
+                        self.chess_board.do_move(i, j)
+                        self.print_board()
+                        self.time.sleep(0.1)
+                        self.clear()
+                        moves += self.perft_terminal(color, deep - 1)
+                        self.chess_board.undo_move()
+                return moves
 
     def __init__(self, chess_board):
+        import time
+        self.time = time
         import friedas_lil_lib as fll
         self.i2l_l2i = fll.letter_and_int()
         self.c2s = fll.clear_to_start
@@ -666,3 +721,4 @@ class chess_terminal:
             'hover_dark_red': "#730505"
         })
         self.chess_board = chess_board
+        self.create_clear_text()
