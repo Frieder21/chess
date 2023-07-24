@@ -6,7 +6,8 @@ def main():
     chess_terminal = chess.chess_terminal(chess_board)
     chess_board.set_up()
     time.sleep(0.5)
-    print(chess_board.perft(3, "white"))
+    print(chess_terminal.chess_board.board)
+    print(chess_terminal.perft_terminal(3, "white", 0.05))
 
 
 # Press the green button in the gutter to run the script.

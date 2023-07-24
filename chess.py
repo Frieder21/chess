@@ -2,8 +2,9 @@ class chess_board:
     def clear_board(self):
         self.board = [0b0 for i in range(self.height * self.width)]
 
-    def FEN_to_binary(self, FEN):
+    def FEN_2_game(self, FEN):
         self.clear_board()
+        self.move_list = []
         chess_field = 0
         FEN = FEN.split(' ')
         board_FEN = FEN[0]
@@ -71,6 +72,9 @@ class chess_board:
             self.en_passant = False
         self.halfmove_clock = int(FEN[4])
         self.fullmove_number = int(FEN[5])
+
+    def chess_notation_to_index(self, chess_notation) -> int:
+        return (self.letter2int(chess_notation[0:1])) + (8 - int(chess_notation[1:2])) * self.height
 
     def moves_in_direction(self, position: int, direction: int, color: bin) -> list:
         possible_moves = []
@@ -408,14 +412,16 @@ class chess_board:
         """
         return end_pos in self.possible_moves(start_pos)[1]
 
-
-    def do_move(self, start_pos: int, end_pos: int) -> None:
+    def do_move(self, start_pos: int, end_pos: int) -> bool:
         """
 
         :param start_pos:
         :param end_pos:
         :return:
         """
+        if start_pos & self.white and self.moving_side:
+            pass
+
         if self.move_possible(start_pos, end_pos):
             self.move_list.append(
                 (start_pos, end_pos, self.board[start_pos], self.board[end_pos], self.en_passant, self.castling))
@@ -445,7 +451,7 @@ class chess_board:
                     self.board[start_pos + 1] = self.rook + self.white
                 elif start_pos == self.white_king_pos and end_pos == self.white_king_pos - 2:
                     self.board[start_pos - 4] = 0
-                    self.board[start_pos -1] = self.rook + self.white
+                    self.board[start_pos - 1] = self.rook + self.white
                 self.board[start_pos] = 0
                 self.board[end_pos] = self.king + self.white
                 self.castling = self.castling.replace("K", "")
@@ -478,8 +484,18 @@ class chess_board:
             else:
                 self.board[end_pos] = self.board[start_pos]
                 self.board[start_pos] = 0
+            return True
+        else:
+            return False
 
+    def do_move_chess_notation(self, start_pos: str, end_pos: str) -> bool:
+        """
 
+        :param start_pos:
+        :param end_pos:
+        :return:
+        """
+        return self.do_move(self.chess_notation_to_index(start_pos), self.chess_notation_to_index(end_pos))
 
     def undo_move(self) -> None:
         """
@@ -490,13 +506,10 @@ class chess_board:
             move = self.move_list.pop()
             self.board[move[0]] = move[2]
             self.board[move[1]] = move[3]
+            print(self.en_passant, move[4])
             self.en_passant = move[4]
+
             self.castling = move[5]
-
-
-
-
-
 
     def all_possible_moves_side(self, color, with_piece_type: bool = False):
         possible_moves = {}
@@ -525,12 +538,11 @@ class chess_board:
             return possible_moves
 
     def set_up(self):
-        self.FEN_to_binary('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+        self.FEN_2_game('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
         self.move_list = []
 
     def binary_to_FEN(self):
         pass
-
 
     def perft(self, deep: int, color: str = "white") -> int:
         if deep == 0:
@@ -551,6 +563,7 @@ class chess_board:
                         moves += self.perft(deep - 1, color)
                         self.undo_move()
                 return moves
+
     def __init__(self):
         import friedas_lil_lib as fll
         self.i2l_l2i = fll.letter_and_int()
@@ -569,15 +582,15 @@ class chess_board:
         self.black = 0b10000
         self.white_king_pos = 4
         self.black_king_pos = 60
-        self.white_rook_pos = [self.width*(self.height-1), self.width*self.height-1]
-        self.black_rook_pos = [0, self.width-1]
+        self.white_rook_pos = [self.width * (self.height - 1), self.width * self.height - 1]
+        self.black_rook_pos = [0, self.width - 1]
         self.moving_side = None
         self.en_passant = None
         self.castling = None
         self.halfmove_clock = None
         self.fullmove_number = None
         self.move_list = []
-        self.FEN_to_binary('rnbqkbnr/pp2pppp/2p5/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3')
+        self.FEN_2_game('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 
 class chess_terminal:
@@ -671,14 +684,15 @@ class chess_terminal:
 
     def create_clear_text(self):
         self.clear_text = ""
-        for i in range(self.chess_board.height+3):
-            for j in range(self.chess_board.width+3):
+        for i in range(self.chess_board.height + 3):
+            for j in range(self.chess_board.width + 3):
                 self.clear_text += "   "
             self.clear_text += "\n"
+
     def clear(self):
         self.c2s(self.clear_text)
 
-    def perft_terminal(self, color: str = "white", deep: int = 2) -> int:
+    def perft_terminal(self, deep: int = 2, color: str = "white", display_time: float = 0.1) -> int:
         if deep == 0:
             return 1
         else:
@@ -695,9 +709,9 @@ class chess_terminal:
                     for j in possible_moves[i]:
                         self.chess_board.do_move(i, j)
                         self.print_board()
-                        self.time.sleep(0.1)
+                        self.time.sleep(display_time)
                         self.clear()
-                        moves += self.perft_terminal(color, deep - 1)
+                        moves += self.perft_terminal(deep - 1, color=color, display_time=display_time)
                         self.chess_board.undo_move()
                 return moves
 
